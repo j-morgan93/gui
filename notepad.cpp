@@ -87,11 +87,9 @@ void notepad::on_pushButton_clicked()
         if (!file.open(QIODevice::ReadOnly)) {
             //error message
         } else {
-            while (!file.atEnd()) {
+            for (int row = 0; row < 4; ++row) {
                 QByteArray line = file.readLine();
-                int comm = 0;
                 if (line.startsWith("*")) {// Read in the header of the file.
-                    comm++;
                     QByteArray line = file.readLine();
                     ui->label->setText(line);
                 }
