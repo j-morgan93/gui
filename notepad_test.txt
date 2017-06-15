@@ -1,0 +1,45 @@
+### Introductory StarCCM+ Example PBS Script
+### Copyright (c) 2013 The Center for Advanced Research Computing 
+###                           at The University of New Mexico
+
+#PBS -lnodes=4:ppn=8
+#
+#PBS -q defaultq
+
+#PBS -lwalltime=8:00:00
+#PBS -S /bin/tcsh
+
+cd $PBS_O_WORKDIR
+# Set the name of the .sim file to process here
+setenv SIM rect_sph_0148ca0_C25_CFL5@02000.sim    
+
+# determine the number of processors allocated to this job
+
+setenv PROCS `cat $PBS_NODEFILE | wc -l`
+
+# load in the environment modules
+source /etc/profile.d/modules.csh
+
+# load the StarCCM+ environment module
+module load starccm/10.04.011
+setenv CDLMD_LICENSE_FILE 1999@129.24.143.247
+setenv LM_LICENSE_FILE 1999@129.24.143.247
+
+# find short Job ID
+setenv SHORT_JOBID `echo $PBS_JOBID | awk -F. '{print $1}'`
+
+echo Simulation ${SIM} Procs: ${PROCS} Job ID: ${SHORT_JOBID}
+
+echo starting StarCCM+ at `date`
+# Run StarCCM+ on $PROCS processors which are listed in the $PBS_NODEFILE
+/usr/bin/time -o starccm-$SIM-$PROCS-$SHORT_JOBID.time \
+  starccm+ -np $PROCS -rsh ssh -machinefile $PBS_NODEFILE -batch $SIM > test.log
+echo Finished running StarCCM+ at `date`
+
+echo timing information:
+cat starccm-$SIM-$PROCS-$SHORT_JOBID.time
+# Remove the timing information file so we don't clutter the filesystem
+rm starccm-$SIM-$PROCS-$SHORT_JOBID.time
+
+
+
